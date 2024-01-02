@@ -55,28 +55,45 @@ Providing an interface for the user to make a request on the structure of fetche
 #### High-level Overview:
 ```
 rinkrat
-├── team
-│   ├── league
-│   ├── conference
-│   ├── division
-│   └── wild-card
+├── standings 
+│   ├── overall
+│   ├── conference [east, west]
+│   ├── division [atlantic, metro, central, pacific]
+│   └── wild-card [east, west]
+├── team 
+│   ├── roster [abbreviation]
+│   └── stats [abbreviation]
+├── leaders
+│   ├── goals
+│   ├── assists
+│   ├── points
+│   ├── goals-against-average
+│   ├── save-percentage
+│   └── wins
 └── player
-    └── ?
+    ├── about [name]
+    └── stats [name]
 ```
 #### Lower-level Overview:
 
-**Base Data Options:**
+**Subparsers:**
 
--t, --team: 
-Default option. Usage unlocks subset options that apply to NHL Team data. Providing a team abbreviation fetches results for just one team (untested)
+team: 
+Usage unlocks subset options that apply to NHL Team data.
 
--p, --players:
+players:
 Usage unlocks subset of options that apply to searching NHL player stats.
 
-**Team Options:**
+leaders:
+Usage unlocks subset of options that fetch the league leaders for the provided category.
 
--o, --league:
-Default Option. Groups teams in overall league ranking (1-32).
+standings:
+Usage unlocks subset of options that fetch the league leaders for the provided category.
+
+**Standings Options:**
+
+-o, --overall:
+Groups teams in overall league ranking (1-32).
 
 -c, --conference:
 Groups teams by their conference in ranked order (1-16 east, 1-16 west).
@@ -86,6 +103,23 @@ Groups teams by their division in ranked order (1-8 atlantic, 1-8 metropolitan, 
 
 -w, --wild-card:
 Groups teams by their conference/division in ranked order with the wild-card cut line (1-3 atlantic + 1-3 metropolitan + 1-8 wild-card-east, ...)
+
+**Player Options:**
+-a, --about:
+Provides some detail about the players background.
+
+-s, --stats:
+Displays player stats for the current year.
+
+**Team Options:**
+-r, --roster:
+Shows the active roster for the abbreviated team.
+
+-s, --stats:
+Shows the stats for the players on the roster
+
+**Leaders Options:**
+TBD
 
 #### Example Help Page:
 ```
