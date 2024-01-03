@@ -1,22 +1,44 @@
 import argparse
 
 import order # local
+import api # local
+
+def display(result: dict) -> None:
+    for group in result:
+
+        # group header
+        caps = [word.capitalize() for word in group.replace("_", " ").split(" ")]
+        print(' '.join(caps))
+
+        print(f'{"Team": <26}{"GP": <4}{"W": <4}{"L": <4}{"OTL": <4}{"PTS": <4}')
+
+        # ranked team stats
+        for team in result[group]:
+
+            print('{0[teamName][default]:<26}{0[gamesPlayed]:<4}{0[wins]:<4}'
+                  '{0[losses]:<4}{0[otLosses]:<4}{0[points]:<4}'.format(team))
+
+        print()
 
 def get_standings(args) -> None:
 
-    # api call
+    response = api.get_current_standings()
+    teams = response['standings']
+    result = dict()
 
     if args.overall:
-        order.order_by_overall()
+        result = order.order_by_overall(teams)
 
     if args.conference:
-        order.order_by_conference()
+        result = order.order_by_conference(teams)
 
     if args.division:
-        order.order_by_division()
+        result = order.order_by_division(teams)
 
     if args.wild_card:
-        order.order_by_wild_card()
+        result = order.order_by_wild_card(teams)
+
+    display(result)
 
 def _parse_args():
     parser = argparse.ArgumentParser(prog = 'rinkrat')
