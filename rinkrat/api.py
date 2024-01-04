@@ -2,21 +2,27 @@ import requests
 import requests_cache
 from datetime import timedelta
 
-standings_url = 'https://api-web.nhle.com/v1/standings/now'
-
-urls_expire_after = {
-    standings_url: timedelta(0, 0, 0, 0, 5, 0, 0) # 5 minutes
-}
+standings_base_url = 'https://api-web.nhle.com/v1/standings/'
 
 requests_cache.install_cache(
-    '../data/rinkrat_cache',
+    'data/rinkrat_cache', # todo - find root and place in data folder
     'sqlite',
-    urls_expire_after = urls_expire_after,
+    expire_after = timedelta(0, 0, 0, 0, 5.0, 0, 0)
 )
 
-def get_current_standings() -> dict:
+def _get(url: str, params=None, **kwargs) -> dict:
     try:
-        response = requests.get(standings_url)
+        response = requests.get(url, params=params, **kwargs)
         return response.json()
     except requests.exceptions.RequestException as e:
         raise SystemExit(e)
+    
+def request_league_standings(date: str, params=None, **kwargs) -> dict:
+    """
+    Sends a GET request for the league standings on specified date (optional).
+    Returns the json-encoded content of a response, if any.
+    """
+
+    url = '{}{}'.format(standings_base_url, date)
+
+    return _get(url, params=params, **kwargs)

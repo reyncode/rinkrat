@@ -1,7 +1,8 @@
 import argparse
+from datetime import datetime
 
-import order # local
-import api # local
+import api
+import order
 
 def display(result: dict) -> None:
     for group in result:
@@ -22,7 +23,12 @@ def display(result: dict) -> None:
 
 def get_standings(args) -> None:
 
-    response = api.get_current_standings()
+    date = datetime.now()
+
+    now = '{:04d}-{:02d}-{:02d}'.format(date.year, date.month, date.day)
+
+    response = api.request_league_standings(now)
+
     teams = response['standings']
     result = dict()
 
@@ -50,7 +56,10 @@ def _parse_args():
     standings_parser = subparsers.add_parser('standings')
 
     standings_group = standings_parser.add_mutually_exclusive_group()
+
+    # accept nothing or a string date (0 or 1 args)
     standings_group.add_argument('-o', '--overall', action = 'store_true')
+
     standings_group.add_argument('-c', '--conference', action = 'store_true')
     standings_group.add_argument('-d', '--division', action = 'store_true')
     standings_group.add_argument('-w', '--wild-card', action = 'store_true')
