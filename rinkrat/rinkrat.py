@@ -9,7 +9,8 @@ result = dict()
 date = datetime.now()
 today = '{:04d}-{:02d}-{:02d}'.format(date.year, date.month, date.day)
 
-def display(result: dict, date) -> None:
+def display_standings(result: dict, date) -> None:
+
     print(f'{"Date": <26}{date}')
 
     for group in result:
@@ -30,19 +31,19 @@ def display(result: dict, date) -> None:
 
 def overall(teams, date):
     result = order.order_by_overall(teams)
-    display(result, date)
+    display_standings(result, date)
 
 def conference(teams, date):
     result = order.order_by_conference(teams)
-    display(result, date)
+    display_standings(result, date)
 
 def division(teams, date):
     result = order.order_by_division(teams)
-    display(result, date)
+    display_standings(result, date)
 
 def wild_card(teams, date):
     result = order.order_by_wild_card(teams)
-    display(result, date)
+    display_standings(result, date)
 
 class StandingsAction(argparse.Action):
     def __init__(self, option_strings, order,
@@ -54,11 +55,24 @@ class StandingsAction(argparse.Action):
     def __call__(self, parser, args, values, option_string=None):
         setattr(args, self.dest, values)
 
-        # validate
+        for fmt in ('%Y-%m-%d', '%Y.%m.%d', '%Y/%m/%d', '%Y%m%d'):
+            try:
+                standings_date = datetime.strptime(values, fmt)
 
-        response = api.request_league_standings(values)
+                search_date_string = '{:04d}-{:02d}-{:02d}'.format(standings_date.year, 
+                                                                   standings_date.month, 
+                                                                   standings_date.day)
 
-        self._order(response['standings'], values)
+                response = api.request_league_standings(search_date_string)
+
+                self._order(response['standings'], values)
+
+                return
+
+            except ValueError:
+                pass
+
+        raise SystemExit(ValueError('Invalid date format: please use YYYY-MM-DD, YYYY/MM/DD, YYYY.MM.DD or YYYYMMDD'))
 
 def _parse_args():
     parser = argparse.ArgumentParser(prog = 'rinkrat')
@@ -70,7 +84,8 @@ def _parse_args():
     standings_group = standings_parser.add_mutually_exclusive_group()
 
     standings_group.add_argument('-o', '--overall', nargs='?', const=today,
-                                 action=StandingsAction, order=overall)
+                                 action=StandingsAction, order=overall,
+                                 metavar='YYYY-MM-DD')
 
     standings_group.add_argument('-c', '--conference', nargs='?', const=today,
                                  action=StandingsAction, order=conference)

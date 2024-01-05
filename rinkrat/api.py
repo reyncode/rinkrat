@@ -13,7 +13,14 @@ requests_cache.install_cache(
 def _get(url: str, params=None, **kwargs) -> dict:
     try:
         response = requests.get(url, params=params, **kwargs)
-        return response.json()
+        response.raise_for_status()
+
+        try:
+            result = response.json()
+            return result
+        except requests.exceptions.JSONDecodeError as e:
+            raise SystemExit(e)
+
     except requests.exceptions.RequestException as e:
         raise SystemExit(e)
     
