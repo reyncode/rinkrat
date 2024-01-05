@@ -6,8 +6,8 @@ import order
 
 result = dict()
 
-date = datetime.now()
-today = '{:04d}-{:02d}-{:02d}'.format(date.year, date.month, date.day)
+todays_date = datetime.now()
+today_string = '{:04d}-{:02d}-{:02d}'.format(todays_date.year, todays_date.month, todays_date.day)
 
 def display_standings(result: dict, date) -> None:
 
@@ -45,6 +45,14 @@ def wild_card(teams, date):
     result = order.order_by_wild_card(teams)
     display_standings(result, date)
 
+def validate_date(text: str) -> datetime:
+    for fmt in ('%Y-%m-%d', '%Y.%m.%d', '%Y/%m/%d', '%Y%m%d'):
+        try:
+            return datetime.strptime(text, fmt)
+        except ValueError:
+            pass
+    raise SystemExit(ValueError('Invalid date format: please use YYYY-MM-DD, YYYY/MM/DD, YYYY.MM.DD or YYYYMMDD'))
+
 class StandingsAction(argparse.Action):
     def __init__(self, option_strings, order,
                  *args, **kwargs):
@@ -55,24 +63,14 @@ class StandingsAction(argparse.Action):
     def __call__(self, parser, args, values, option_string=None):
         setattr(args, self.dest, values)
 
-        for fmt in ('%Y-%m-%d', '%Y.%m.%d', '%Y/%m/%d', '%Y%m%d'):
-            try:
-                standings_date = datetime.strptime(values, fmt)
+        query_date = validate_date(values)
+        query_date_string = '{:04d}-{:02d}-{:02d}'.format(query_date.year, 
+                                                          query_date.month, 
+                                                          query_date.day)
 
-                search_date_string = '{:04d}-{:02d}-{:02d}'.format(standings_date.year, 
-                                                                   standings_date.month, 
-                                                                   standings_date.day)
+        response = api.request_league_standings(query_date_string)
 
-                response = api.request_league_standings(search_date_string)
-
-                self._order(response['standings'], values)
-
-                return
-
-            except ValueError:
-                pass
-
-        raise SystemExit(ValueError('Invalid date format: please use YYYY-MM-DD, YYYY/MM/DD, YYYY.MM.DD or YYYYMMDD'))
+        self._order(response['standings'], values)
 
 def _parse_args():
     parser = argparse.ArgumentParser(prog = 'rinkrat')
@@ -83,17 +81,17 @@ def _parse_args():
 
     standings_group = standings_parser.add_mutually_exclusive_group()
 
-    standings_group.add_argument('-o', '--overall', nargs='?', const=today,
+    standings_group.add_argument('-o', '--overall', nargs='?', const=today_string,
                                  action=StandingsAction, order=overall,
                                  metavar='YYYY-MM-DD')
 
-    standings_group.add_argument('-c', '--conference', nargs='?', const=today,
+    standings_group.add_argument('-c', '--conference', nargs='?', const=today_string,
                                  action=StandingsAction, order=conference)
 
-    standings_group.add_argument('-d', '--division', nargs='?', const=today,
+    standings_group.add_argument('-d', '--division', nargs='?', const=today_string,
                                  action=StandingsAction, order=division)
 
-    standings_group.add_argument('-w', '--wild-card', nargs='?', const=today,
+    standings_group.add_argument('-w', '--wild-card', nargs='?', const=today_string,
                                  action=StandingsAction, order=wild_card)
 
     return parser.parse_args()
