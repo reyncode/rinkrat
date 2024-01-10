@@ -2,37 +2,32 @@ import argparse
 import sys
 from typing import List
 
+from commands import standings, team
+
 class Cli:
     def __init__(self, argv: List[str]) -> None:
         self.argv = argv
 
-        parser = argparse.ArgumentParser(
-            usage="rinkrat <command> [<args>]"
-        )
+        parser = argparse.ArgumentParser()
 
-        parser.add_argument("command", help="rinkrat commands")
+        parser.add_argument("command")
 
         args = parser.parse_args(argv[:1])
 
+        # connect the constructor to the attribute
+        setattr(self, "standings", standings.Standings)
+        setattr(self, "team", team.Team)
+
         try:
-            getattr(self, args.command)()
+            # run the constructor for the command of the invoked attribute
+            getattr(self, args.command)(argv[1:])
         except AttributeError:
+            print(f"{args.command} is not a valid command.")
             parser.print_help()
-
-    def test(self):
-        parser = argparse.ArgumentParser(description="prints a string")
-        parser.add_argument("-t", "--test", required=True, dest="string", help="the test option")
-
-        args = parser.parse_args(self.argv[1:])
-
-        test_action(args.string)
-
-
-def test_action(string):
-    print(string)
 
 def main(argv: List[str]):
     Cli(argv)
 
 if __name__ == "__main__":
+    # chop the program name out of the argument list
     main(sys.argv[1:])
