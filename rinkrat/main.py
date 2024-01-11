@@ -6,8 +6,6 @@ from commands import standings, team
 
 class Cli:
     def __init__(self, argv: List[str]) -> None:
-        self.argv = argv
-
         parser = argparse.ArgumentParser()
 
         parser.add_argument("command")
@@ -29,5 +27,5 @@ def main(argv: List[str]):
     Cli(argv)
 
 if __name__ == "__main__":
-    # chop the program name out of the argument list
+    # don't include program name
     main(sys.argv[1:])
