@@ -19,8 +19,6 @@ class Standings:
         parser = argparse.ArgumentParser(prog="standings")
         group = parser.add_mutually_exclusive_group()
 
-        # define the standings options
-
         group.add_argument(
             "-o",
             "--overall",
@@ -60,14 +58,22 @@ class Standings:
             help="query rankings for this date, YYYY-MM-DD",
         )
         
+        args = parser.parse_args(argv)
+
+        if (args.date and (
+                args.overall is False and 
+                args.conference is False and 
+                args.division is False and 
+                args.wild_card is False)):
+            # error, shouldn't be accessable without any of these options
+            argparse.ArgumentParser.error(self=parser, message="you must use one of the available options, see standings --help")
+
         # create a dictionary of options that contain values
-        opts = vars(parser.parse_args(argv))
-        self.opts = {k: v for k, v in opts.items() if v not in (None, "", False)}
-        
+        self.opts = {k: v for k, v in vars(args).items() if v not in (None, "", False)}
+
         self.get_data()
         self.order_data()
         self.display()
-
 
     def get_data(self):
         date = validate_query_date(self.opts["date"])
@@ -140,7 +146,7 @@ def validate_query_date(text: str) -> datetime:
     raise SystemExit(
         argparse.ArgumentError(
             argument=None,
-            message="Invalid date supplied as an argument."
+            message="standings: error: invalid date format, use YYYY-MM-DD, see standings --help"
         )
     )
 
