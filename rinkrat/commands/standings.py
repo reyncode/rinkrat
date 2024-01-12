@@ -8,8 +8,7 @@ standings_base_url = 'https://api-web.nhle.com/v1/standings/'
 
 class Standings:
     def __init__(self, argv: List[str]) -> None:
-
-        # set the date for today as a default
+        # use today's date as the default
         today = datetime.now()
         self.date = "{:04d}-{:02d}-{:02d}".format(
             today.year, 
@@ -17,17 +16,17 @@ class Standings:
             today.day
         )
 
-        parser = argparse.ArgumentParser(description="The standings argument parser")
+        parser = argparse.ArgumentParser(prog="standings")
         group = parser.add_mutually_exclusive_group()
 
-        # define the argument selection
+        # define the standings options
 
         group.add_argument(
             "-o",
             "--overall",
             action="store_true",
             dest="overall",
-            help="overall team standings"
+            help="results ranked by league standing"
         )
 
         group.add_argument(
@@ -35,13 +34,30 @@ class Standings:
             "--conference",
             action="store_true",
             dest="conference",
-            help="conference team standings"
+            help="results ranked by conference standing"
+        )
+
+        group.add_argument(
+            "-d",
+            "--division",
+            action="store_true",
+            dest="division",
+            help="results ranked by division standing"
+        )
+
+        group.add_argument(
+            "-w",
+            "--wild-card",
+            action="store_true",
+            dest="wild_card",
+            help="results ranked by wild card standing"
         )
 
         parser.add_argument(
             "date",
             nargs="?",
             default=self.date,
+            help="query rankings for this date, YYYY-MM-DD",
         )
         
         # create a dictionary of options that contain values
@@ -68,7 +84,6 @@ class Standings:
 
     def order_data(self):
         if "overall" in self.opts:
-            
             # TODO: refactor - this is duplicating data in a slightly different order
             self.opts.setdefault(
                 "ranked", 
@@ -76,11 +91,24 @@ class Standings:
             )
 
         if "conference" in self.opts:
-
             # TODO: refactor - this is duplicating data in a slightly different order
             self.opts.setdefault(
                 "ranked", 
                 order_by_conference(self.opts["data"]["standings"])
+            )
+
+        if "division" in self.opts:
+            # TODO: refactor - this is duplicating data in a slightly different order
+            self.opts.setdefault(
+                "ranked", 
+                order_by_division(self.opts["data"]["standings"])
+            )
+
+        if "wild_card" in self.opts:
+            # TODO: refactor - this is duplicating data in a slightly different order
+            self.opts.setdefault(
+                "ranked", 
+                order_by_wild_card(self.opts["data"]["standings"])
             )
 
     def display(self):
@@ -142,5 +170,72 @@ def order_by_conference(teams: List) -> dict:
     result = dict()
     result['eastern'] = eastern
     result['western'] = western
+
+    return result
+
+def order_by_division(teams: List) -> dict:
+    atlantic = []
+    metropolitan = []
+    central = []
+    pacific = []
+
+    for team in teams:
+
+        if team['divisionName'] == 'Atlantic':
+            atlantic.append(team)
+
+        elif team['divisionName'] == 'Metropolitan':
+            metropolitan.append(team)
+
+        elif team['divisionName'] == 'Central':
+            central.append(team)
+
+        elif team['divisionName'] == 'Pacific':
+            pacific.append(team)
+
+    result = dict()
+    result['atlantic'] = atlantic
+    result['metropolitan'] = metropolitan
+    result['central'] = central
+    result['pacific'] = pacific
+
+    return result
+
+def order_by_wild_card(teams: List) -> dict:
+    atlantic = []
+    metropolitan = []
+    central = []
+    pacific = []
+    wild_card_east = []
+    wild_card_west = []
+
+    for team in teams:
+
+        if team['divisionName'] == 'Atlantic' and team['wildcardSequence'] == 0:
+            atlantic.append(team)
+
+        elif team['divisionName'] == 'Metropolitan' and team['wildcardSequence'] == 0:
+            metropolitan.append(team)
+        
+        elif team['divisionName'] == 'Central' and team['wildcardSequence'] == 0:
+            central.append(team)
+        
+        elif team['divisionName'] == 'Pacific' and team['wildcardSequence'] == 0:
+            pacific.append(team)
+        
+        elif team['conferenceName'] == 'Eastern':
+            wild_card_east.append(team)
+        
+        elif team['conferenceName'] == 'Western':
+            wild_card_west.append(team)
+
+    result = dict()
+
+    result['atlantic'] = atlantic
+    result['metropolitan'] = metropolitan
+    result['wild_card_east'] = wild_card_east
+    result['central'] = central
+    result['pacific'] = pacific
+    result['wild_card_west'] = wild_card_west
 
     return result
