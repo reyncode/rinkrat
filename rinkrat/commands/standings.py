@@ -17,6 +17,9 @@ class Standings:
         )
 
         parser = argparse.ArgumentParser(prog="standings")
+
+        self.parser = parser
+
         group = parser.add_mutually_exclusive_group()
 
         group.add_argument(
@@ -76,7 +79,7 @@ class Standings:
         self.display()
 
     def get_data(self):
-        date = validate_query_date(self.opts["date"])
+        date = validate_query_date(self.opts["date"], self.parser)
         date_string = "{:04d}-{:02d}-{:02d}".format(
             date.year, 
             date.month, 
@@ -136,19 +139,14 @@ class Standings:
 
             print()
 
-def validate_query_date(text: str) -> datetime:
+def validate_query_date(text: str, parser: argparse.ArgumentParser) -> datetime:
     for format in ("%Y-%m-%d", "%Y.%m.%d", "%Y/%m/%d", "%Y%m%d"):
         try:
             return datetime.strptime(text, format)
         except ValueError:
             pass
         
-    raise SystemExit(
-        argparse.ArgumentError(
-            argument=None,
-            message="standings: error: invalid date format, use YYYY-MM-DD, see standings --help"
-        )
-    )
+    argparse.ArgumentParser.error(self=parser, message="invalid date format - use YYYY-MM-DD. see standings --help")
 
 def order_by_overall(teams: List) -> dict:
     overall = []
