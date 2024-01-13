@@ -6,6 +6,15 @@ import api
 
 standings_base_url = 'https://api-web.nhle.com/v1/standings/'
 
+usage_str = """standings <command> [<args>]
+
+commands:
+  overall     results ranked by league standing
+  conference  results ranked by conference standing
+  division    results ranked by division standing
+  wild        results ranked by wild card standing
+"""
+
 class Standings:
     def __init__(self, argv: List[str]) -> None:
         # use today's date as the default
@@ -16,15 +25,11 @@ class Standings:
             today.day
         )
 
-        parser = argparse.ArgumentParser(prog="standings")
-
-        # trying something
+        parser = argparse.ArgumentParser(usage=usage_str)
 
         self.parser = parser
 
-        parser.add_argument(
-            "ranking",
-        )
+        parser.add_argument("ranking")
         
         parser.add_argument(
             "-d",
@@ -35,77 +40,19 @@ class Standings:
             help="query rankings for this date, YYYY-MM-DD",
         )
 
-        # goal: store any options in the dictionary first, then handle the ranking
+        args = parser.parse_known_args(argv)
 
-        args = parser.parse_args(argv[:1])
-
-        self.opts = {k: v for k, v in vars(args).items() if v not in (None, "")}
+        # create a dictionary of options that contain values
+        self.opts = {k: v for k, v in vars(args[0]).items() if v not in (None, "")}
 
         try:
-            # ideally, we want the date parsed before going further to avoid duplication
-            getattr(self, args.ranking)(argv[1:])
+            getattr(self, args[0].ranking)(args[1])
 
             print(self.opts)
 
         except AttributeError:
-            print(f"\"{args.ranking}\" is not a valid ranking", end="\n\n")
+            print(f"\"{args[0].ranking}\" is not a valid ranking", end="\n\n")
             parser.print_help()
-
-        # end trying something
-
-        # group = parser.add_mutually_exclusive_group()
-
-        # group.add_argument(
-        #     "-o",
-        #     "--overall",
-        #     action="store_true",
-        #     dest="overall",
-        #     help="results ranked by league standing"
-        # )
-
-        # group.add_argument(
-        #     "-c",
-        #     "--conference",
-        #     action="store_true",
-        #     dest="conference",
-        #     help="results ranked by conference standing"
-        # )
-
-        # group.add_argument(
-        #     "-d",
-        #     "--division",
-        #     action="store_true",
-        #     dest="division",
-        #     help="results ranked by division standing"
-        # )
-
-        # group.add_argument(
-        #     "-w",
-        #     "--wild-card",
-        #     action="store_true",
-        #     dest="wild_card",
-        #     help="results ranked by wild card standing"
-        # )
-
-        # parser.add_argument(
-        #     "date",
-        #     nargs="?",
-        #     default=self.date,
-        #     help="query rankings for this date, YYYY-MM-DD",
-        # )
-        
-        # args = parser.parse_args(argv)
-
-        # if (args.date and (
-        #         args.overall is False and 
-        #         args.conference is False and 
-        #         args.division is False and 
-        #         args.wild_card is False)):
-            # error, shouldn't be accessable without any of these options
-            # argparse.ArgumentParser.error(self=parser, message="you must use one of the available options, see standings --help")
-
-        # create a dictionary of options that contain values
-        # self.opts = {k: v for k, v in vars(args).items() if v not in (None, "", False)}
 
         # self.get_data()
         # self.order_data()
@@ -124,6 +71,7 @@ class Standings:
         # store the response data in our opts dict
         self.opts.setdefault("data", api.get(url))
 
+    # TODO - refactor with lastest changes to arg parsing
     def order_data(self):
         if "overall" in self.opts:
             # TODO: refactor - this is duplicating data in a slightly different order
@@ -172,7 +120,6 @@ class Standings:
 
             print()
 
-    # trying something new
     def overall(self, argv):
         print("overall standings here: {}".format(argv))
         
@@ -188,7 +135,9 @@ class Standings:
             if not argv:
                 selection = ["east", "west"]
             else:
-                selection = argv
+                for arg in argv:
+                    if arg not in selection:
+                        selection.append(arg)
 
             self.opts.setdefault("selection", selection)
         
@@ -202,9 +151,11 @@ class Standings:
             selection = []
 
             if not argv:
-                selection = ["east", "west"]
+                selection = ["atlantic", "metropolitan", "central", "pacific"]
             else:
-                selection = argv
+                for arg in argv:
+                    if arg not in selection:
+                        selection.append(arg)
 
             self.opts.setdefault("selection", selection)
         
@@ -220,10 +171,11 @@ class Standings:
             if not argv:
                 selection = ["east", "west"]
             else:
-                selection = argv
+                for arg in argv:
+                    if arg not in selection:
+                        selection.append(arg)
 
             self.opts.setdefault("selection", selection)
-    # end trying something new
 
 def validate_query_date(text: str, parser: argparse.ArgumentParser) -> datetime:
     for format in ("%Y-%m-%d", "%Y.%m.%d", "%Y/%m/%d", "%Y%m%d"):
