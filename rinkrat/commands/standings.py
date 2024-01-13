@@ -135,9 +135,7 @@ class Standings:
             if not argv:
                 selection = ["east", "west"]
             else:
-                for arg in argv:
-                    if arg not in selection:
-                        selection.append(arg)
+                [selection.append(x) for x in argv if x not in selection]
 
             self.opts.setdefault("selection", selection)
         
@@ -153,9 +151,7 @@ class Standings:
             if not argv:
                 selection = ["atlantic", "metropolitan", "central", "pacific"]
             else:
-                for arg in argv:
-                    if arg not in selection:
-                        selection.append(arg)
+                [selection.append(x) for x in argv if x not in selection]
 
             self.opts.setdefault("selection", selection)
         
@@ -171,9 +167,7 @@ class Standings:
             if not argv:
                 selection = ["east", "west"]
             else:
-                for arg in argv:
-                    if arg not in selection:
-                        selection.append(arg)
+                [selection.append(x) for x in argv if x not in selection]
 
             self.opts.setdefault("selection", selection)
 
