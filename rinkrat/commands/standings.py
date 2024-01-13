@@ -18,65 +18,98 @@ class Standings:
 
         parser = argparse.ArgumentParser(prog="standings")
 
+        # trying something
+
         self.parser = parser
 
-        group = parser.add_mutually_exclusive_group()
-
-        group.add_argument(
-            "-o",
-            "--overall",
-            action="store_true",
-            dest="overall",
-            help="results ranked by league standing"
-        )
-
-        group.add_argument(
-            "-c",
-            "--conference",
-            action="store_true",
-            dest="conference",
-            help="results ranked by conference standing"
-        )
-
-        group.add_argument(
-            "-d",
-            "--division",
-            action="store_true",
-            dest="division",
-            help="results ranked by division standing"
-        )
-
-        group.add_argument(
-            "-w",
-            "--wild-card",
-            action="store_true",
-            dest="wild_card",
-            help="results ranked by wild card standing"
-        )
-
         parser.add_argument(
-            "date",
-            nargs="?",
-            default=self.date,
-            help="query rankings for this date, YYYY-MM-DD",
+            "ranking",
         )
         
-        args = parser.parse_args(argv)
+        parser.add_argument(
+            "-d",
+            "--date",
+            nargs="?",
+            default=self.date,
+            metavar="YYYY-MM-DD",
+            help="query rankings for this date, YYYY-MM-DD",
+        )
 
-        if (args.date and (
-                args.overall is False and 
-                args.conference is False and 
-                args.division is False and 
-                args.wild_card is False)):
+        # goal: store any options in the dictionary first, then handle the ranking
+
+        args = parser.parse_args(argv[:1])
+
+        self.opts = {k: v for k, v in vars(args).items() if v not in (None, "")}
+
+        try:
+            # ideally, we want the date parsed before going further to avoid duplication
+            getattr(self, args.ranking)(argv[1:])
+
+            print(self.opts)
+
+        except AttributeError:
+            print(f"\"{args.ranking}\" is not a valid ranking", end="\n\n")
+            parser.print_help()
+
+        # end trying something
+
+        # group = parser.add_mutually_exclusive_group()
+
+        # group.add_argument(
+        #     "-o",
+        #     "--overall",
+        #     action="store_true",
+        #     dest="overall",
+        #     help="results ranked by league standing"
+        # )
+
+        # group.add_argument(
+        #     "-c",
+        #     "--conference",
+        #     action="store_true",
+        #     dest="conference",
+        #     help="results ranked by conference standing"
+        # )
+
+        # group.add_argument(
+        #     "-d",
+        #     "--division",
+        #     action="store_true",
+        #     dest="division",
+        #     help="results ranked by division standing"
+        # )
+
+        # group.add_argument(
+        #     "-w",
+        #     "--wild-card",
+        #     action="store_true",
+        #     dest="wild_card",
+        #     help="results ranked by wild card standing"
+        # )
+
+        # parser.add_argument(
+        #     "date",
+        #     nargs="?",
+        #     default=self.date,
+        #     help="query rankings for this date, YYYY-MM-DD",
+        # )
+        
+        # args = parser.parse_args(argv)
+
+        # if (args.date and (
+        #         args.overall is False and 
+        #         args.conference is False and 
+        #         args.division is False and 
+        #         args.wild_card is False)):
             # error, shouldn't be accessable without any of these options
-            argparse.ArgumentParser.error(self=parser, message="you must use one of the available options, see standings --help")
+            # argparse.ArgumentParser.error(self=parser, message="you must use one of the available options, see standings --help")
 
         # create a dictionary of options that contain values
-        self.opts = {k: v for k, v in vars(args).items() if v not in (None, "", False)}
+        # self.opts = {k: v for k, v in vars(args).items() if v not in (None, "", False)}
 
-        self.get_data()
-        self.order_data()
-        self.display()
+        # self.get_data()
+        # self.order_data()
+        # self.display()
 
     def get_data(self):
         date = validate_query_date(self.opts["date"], self.parser)
@@ -138,6 +171,59 @@ class Standings:
                       '{0[losses]:<4}{0[otLosses]:<4}{0[points]:<4}'.format(team))
 
             print()
+
+    # trying something new
+    def overall(self, argv):
+        print("overall standings here: {}".format(argv))
+        
+    def conference(self, argv: List[str]):
+        conferences = ["east", "west"]
+        if any(i not in conferences for i in argv):
+            argparse.ArgumentParser.error(
+                self=self.parser,
+                message="you can only use 'east' or 'west', see standings --help")
+        else:
+            selection = []
+
+            if not argv:
+                selection = ["east", "west"]
+            else:
+                selection = argv
+
+            self.opts.setdefault("selection", selection)
+        
+    def division(self, argv):
+        divisions = ["atlantic", "metropolitan", "central", "pacific"]
+        if any(i not in divisions for i in argv):
+            argparse.ArgumentParser.error(
+                self=self.parser,
+                message="you can only use 'atlantic', 'metropolitan', 'central', 'pacific', see standings --help")
+        else:
+            selection = []
+
+            if not argv:
+                selection = ["east", "west"]
+            else:
+                selection = argv
+
+            self.opts.setdefault("selection", selection)
+        
+    def wild(self, argv):
+        conferences = ["east", "west"]
+        if any(i not in conferences for i in argv):
+            argparse.ArgumentParser.error(
+                self=self.parser,
+                message="you can only use 'east' or 'west', see standings --help")
+        else:
+            selection = []
+
+            if not argv:
+                selection = ["east", "west"]
+            else:
+                selection = argv
+
+            self.opts.setdefault("selection", selection)
+    # end trying something new
 
 def validate_query_date(text: str, parser: argparse.ArgumentParser) -> datetime:
     for format in ("%Y-%m-%d", "%Y.%m.%d", "%Y/%m/%d", "%Y%m%d"):
