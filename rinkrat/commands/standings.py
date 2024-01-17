@@ -54,7 +54,8 @@ class Standings:
         self.get_data()
 
         self.rank_results()
-        # self.display()
+
+        self.display()
 
     def get_data(self):
         date = validate_query_date(self.opts["date"], self.parser)
@@ -66,23 +67,31 @@ class Standings:
 
         url = '{}{}'.format(standings_base_url, date_string)
 
-        # store the response data in our opts dict
         self.opts.setdefault("data", api.get(url))
 
     def display(self):
-        print(f'{"Date": <26}{self.opts["date"]}')
+        """Show the ranked results on the console"""
 
-        for group in self.opts["ranked"]:
+        """
+        [date]
 
+        [group-header]
+        [team-stat-header]
+        [ranked-team-stats]
+        """
+
+        # show the date
+        print(f'{"Date": <26}{self.opts["date"]}', end="\n\n")
+
+        for group, teams in self.opts["ranked"].items():
             # group header
-            caps = [word.capitalize() for word in group.replace("_", " ").split(" ")]
-            print(f'{" ".join(caps)}')
+            print(f"{group}")
 
+            # team stat header
             print(f'{"Team": <26}{"GP": <4}{"W": <4}{"L": <4}{"OTL": <4}{"PTS": <4}')
 
             # ranked team stats
-            for team in self.opts["ranked"][group]:
-
+            for team in teams:
                 print('{0[teamName][default]:<26}{0[gamesPlayed]:<4}{0[wins]:<4}'
                       '{0[losses]:<4}{0[otLosses]:<4}{0[points]:<4}'.format(team))
 
@@ -104,7 +113,6 @@ class Standings:
                 message="you can only use 'eastern' or 'western', see standings --help")
         else:
             selection = []
-
             if not argv:
                 selection = ["eastern", "western"]
             else:
@@ -120,7 +128,6 @@ class Standings:
                 message="you can only use 'atlantic', 'metropolitan', 'central', 'pacific', see standings --help")
         else:
             selection = []
-
             if not argv:
                 selection = ["atlantic", "metropolitan", "central", "pacific"]
             else:
@@ -129,16 +136,15 @@ class Standings:
             self.opts.setdefault("selection", selection)
         
     def wild(self, argv):
-        conferences = ["east", "west"]
+        conferences = ["eastern", "western"]
         if any(i not in conferences for i in argv):
             argparse.ArgumentParser.error(
                 self=self.parser,
-                message="you can only use 'east' or 'west', see standings --help")
+                message="you can only use 'eastern' or 'western', see standings --help")
         else:
             selection = []
-
             if not argv:
-                selection = ["east", "west"]
+                selection = ["eastern", "western"]
             else:
                 [selection.append(x) for x in argv if x not in selection]
 
@@ -146,7 +152,10 @@ class Standings:
 
     def rank_results(self):
         if self.opts["ranking"] == "overall":
-            self.opts.setdefault("ranked", {})
+            self.opts.setdefault(
+                "ranked",
+                ranked_by_overall(self, 
+                                  self.opts["data"]["standings"]))
 
         if self.opts["ranking"] == "conference":
             self.opts.setdefault(
@@ -161,7 +170,23 @@ class Standings:
                                    self.opts["data"]["standings"]))
 
         if self.opts["ranking"] == "wild":
-            self.opts.setdefault("ranked", {})
+            self.opts.setdefault(
+                "ranked",
+                ranked_by_wild(self, 
+                               self.opts["data"]["standings"]))
+
+def ranked_by_overall(self, teams: List) -> dict:
+    result = dict()
+    name = str()
+
+    for x in self.opts["selection"]:
+        name = x.capitalize()
+        result.setdefault(name, [])
+
+    for team in teams:
+        result[name].append(team)
+
+    return result
 
 def ranked_by_conference(self, teams: List) -> dict:
     result = dict()
@@ -184,6 +209,19 @@ def ranked_by_division(self, teams: List) -> dict:
     for team in teams:
         if team["divisionName"] in result:
             result[team["divisionName"]].append(team)
+
+    return result
+
+def ranked_by_wild(self, teams: List) -> dict:
+    result = dict()
+
+    for x in self.opts["selection"]:
+        result.setdefault(x.capitalize(), [])
+
+    for team in teams:
+        if team["conferenceName"] in result:
+            if team["wildcardSequence"] > 0:
+                result[team["conferenceName"]].append(team)
 
     return result
 
