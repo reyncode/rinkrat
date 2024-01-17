@@ -91,13 +91,16 @@ class Standings:
             # team stat header
             print(f'{"Team": <26}{"GP": <4}{"W": <4}{"L": <4}{"OTL": <4}{"PTS": <4}{"L10": <8}{"STRK": <5}')
 
-            # todo - filter header
-
 
             # L10 leaving an extra space for 10-0-0 teams
 
             # ranked team stats
             for team in teams:
+                # print('{0[teamName][default]:<26}{0[gamesPlayed]:<4}{0[wins]:<4}'
+                #       '{0[losses]:<4}{0[otLosses]:<4}{0[points]:<4}'
+                #       '{0[l10Wins]}-{0[l10Losses]}-{0[l10OtLosses]:<4}'
+                #       '{0[streakCode]}{0[streakCount]:<2}'.format(team))
+
                 for key, value in team.items():
                     if key == "teamName":
                         print(f"{value['default']: <26}", end="")
