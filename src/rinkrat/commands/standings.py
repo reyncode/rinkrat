@@ -89,12 +89,9 @@ class Standings:
             print(f"{group}")
 
             # team stat header
-            print(f'{"Team": <26}{"GP": <4}{"W": <4}{"L": <4}{"OTL": <4}{"PTS": <4}{"L10": <8}{"STRK": <5}')
+            print(f'{"Team": <26}{"GP": <4}{"W": <4}{"L": <4}{"OTL": <4}{"PTS": <4}')
 
             # todo - filter header
-
-
-            # L10 leaving an extra space for 10-0-0 teams
 
             # ranked team stats
             for team in teams:
@@ -112,6 +109,9 @@ class Standings:
                         print(f"{value: <4}", end="")
 
                     elif key == "otLosses":
+                        print(f"{value: <4}", end="")
+
+                    elif key == "points":
                         print(f"{value: <4}", end="")
                     
                     # todo - L10
