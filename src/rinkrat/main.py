@@ -12,29 +12,32 @@ commands:
 """
 
 class Cli:
-    def __init__(self, argv: List[str]) -> None:
+    def __init__(self) -> None:
         # create an attribute that points to the command's constructor
         setattr(self, "standings", standings.Standings)
         setattr(self, "team", team.Team)
 
-        parser = argparse.ArgumentParser(
-            usage=usage_str
-        )
+        self.parser = argparse.ArgumentParser(prog="rinkrat", usage=usage_str)
+        self.parser.add_argument("command")
 
-        parser.add_argument("command")
-
-        args = parser.parse_args(argv[:1])
+    def run(self, argv: List[str]) -> None:
+        args = self.parser.parse_args(argv[:1])
 
         try:
-            # invoke the constructor of the selected command and pass the relevant args
             getattr(self, args.command)(argv[1:])
+            # ^ invoke the relevant constructor with the users args
         except AttributeError:
-            print(f"\"{args.command}\" is not a valid command.", end="\n\n")
-            parser.print_help()
+            invalid = f"\"{args.command}\" is not a valid command, see --help"
+
+            argparse.ArgumentParser.error(
+                self=self.parser,
+                message=invalid)
+
 
 def main(argv: List[str]):
-    Cli(argv)
+    cli = Cli()
+    cli.run(argv)
 
 if __name__ == "__main__":
-    # don't include the name of the program
     main(sys.argv[1:])
+    # ^ don't include the name of the program
