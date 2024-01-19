@@ -6,20 +6,25 @@ build-backend = "setuptools.build_meta"
 name = "rinkrat"
 version = "0.0.1"
 authors = [
-  { name="Alex Reynolds", email="alxreynolds@protonmail.com" },
+  { name="Alex Reynolds" },
 ]
 description = "A command line tool to query NHL stats."
 readme = "README.md"
 requires-python = ">=3.8"
-classifiers = {
+classifiers = [
     "Topic :: Utilities",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Environment :: Console",
     "Operating System :: OS Independent",
-}
+]
 
 [project.urls]
 Homepage = "https://github.com/reyncode/rinkrat.git"
 Issues = "https://github.com/reyncode/rinkrat/issues"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]

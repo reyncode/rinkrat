@@ -5,11 +5,20 @@ from rinkrat import main
 '''
     main.py unit test
 
-    - the command passed is a registered attribute of the Cli class
     - passing an invalid command raises an exception and ends the program
-    - passing a valid command invokes the constructor of the relevant command
 
 '''
 
-def test_cli_has_standings():
+def test_cli_has_command_attrs():
+    """
+    ensure the cli has assigned the command name as an attribute.
+    """
+    attrs = ["standings"]
+
+    cli = main.Cli()
+
+    for attr in attrs:
+        assert hasattr(cli, attr)
+
+def test_cli_exit_on_bad_command():
     pass

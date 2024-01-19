@@ -2,7 +2,7 @@ import argparse
 from datetime import datetime
 from typing import List
 
-import api
+from . import api
 
 standings_base_url = 'https://api-web.nhle.com/v1/standings/'
 
@@ -16,6 +16,7 @@ commands:
 """
 
 class Standings:
+    # TODO separate into setup and parse
     def __init__(self, argv: List[str]) -> None:
         # use today's date as the default
         today = datetime.now()
