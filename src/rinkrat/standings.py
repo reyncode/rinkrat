@@ -6,9 +6,9 @@ from . import api
 
 standings_base_url = 'https://api-web.nhle.com/v1/standings/'
 
-usage_str = """standings <command> [<args>]
+usage_str = """standings <ranking> [<args>]
 
-commands:
+rankings:
   overall     results ranked by league standing
   conference  results ranked by conference standing
   division    results ranked by division standing
@@ -16,47 +16,42 @@ commands:
 """
 
 class Standings:
-    # TODO separate into setup and parse
-    def __init__(self, argv: List[str]) -> None:
+    def __init__(self) -> None:
         # use today's date as the default
         today = datetime.now()
         self.date = "{:04d}-{:02d}-{:02d}".format(
             today.year, 
             today.month, 
-            today.day
-        )
+            today.day)
 
-        parser = argparse.ArgumentParser(usage=usage_str)
-
-        self.parser = parser
-
-        parser.add_argument("ranking")
-        
-        parser.add_argument(
+        self.parser = argparse.ArgumentParser(usage=usage_str)
+        self.parser.add_argument("ranking")
+        self.parser.add_argument(
             "-d",
             "--date",
             nargs="?",
             default=self.date,
             metavar="YYYY-MM-DD",
-            help="query rankings for this date, YYYY-MM-DD",
-        )
+            help="query rankings for this date, YYYY-MM-DD")
 
-        args = parser.parse_known_args(argv)
+    def parse(self, argv: List[str]):
+        args = self.parser.parse_known_args(argv)
 
         # create a dictionary of options that contain values
         self.opts = {k: v for k, v in vars(args[0]).items() if v not in (None, "")}
-
+        
         try:
             getattr(self, args[0].ranking)(args[1])
+
+            self.get_data()
+            self.rank_results()
+            self.display()
         except AttributeError:
-            print(f"\"{args[0].ranking}\" is not a valid ranking", end="\n\n")
-            parser.print_help()
+            invalid = f"\"{args[0].ranking}\" is not a valid ranking, see --help"
 
-        self.get_data()
-
-        self.rank_results()
-
-        self.display()
+            argparse.ArgumentParser.error(
+                self=self.parser,
+                message=invalid)
 
     def get_data(self):
         date = validate_query_date(self.opts["date"], self.parser)

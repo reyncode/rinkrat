@@ -22,8 +22,10 @@ class Cli:
         args = self.parser.parse_args(argv[:1])
 
         try:
-            getattr(self, args.command)(argv[1:])
-            # ^ invoke the relevant constructor with the users args
+            # invoke the relevant constructor
+            handler = getattr(self, args.command)()
+            # parse the users args
+            handler.parse(argv[1:])
         except AttributeError:
             invalid = f"\"{args.command}\" is not a valid command, see --help"
 
