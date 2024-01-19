@@ -1,6 +1,6 @@
 import pytest
 
-from rinkrat import main
+from rinkrat import cli
 
 '''
     main.py unit test
@@ -15,10 +15,10 @@ def test_cli_has_command_attrs():
     """
     attrs = ["standings"]
 
-    cli = main.Cli()
+    obj = cli.Cli()
 
     for attr in attrs:
-        assert hasattr(cli, attr)
+        assert hasattr(obj, attr)
 
 def test_cli_exit_on_bad_command():
     pass

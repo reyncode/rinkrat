@@ -1,4 +1,4 @@
-from rinkrat import main, standings
+from rinkrat import cli, standings
 
 def test_cli_command_has_constructor():
     """
