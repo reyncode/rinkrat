@@ -17,6 +17,12 @@ rankings:
 
 class Standings:
     def __init__(self) -> None:
+        # being verbose on set ranking attrs
+        setattr(self, "overall", self.overall)
+        setattr(self, "conference", self.conference)
+        setattr(self, "division", self.division)
+        setattr(self, "wild", self.wild)
+
         # use today's date as the default
         today = datetime.now()
         self.date = "{:04d}-{:02d}-{:02d}".format(
@@ -52,70 +58,6 @@ class Standings:
             argparse.ArgumentParser.error(
                 self=self.parser,
                 message=invalid)
-
-    def get_data(self):
-        date = validate_query_date(self.opts["date"], self.parser)
-        date_string = "{:04d}-{:02d}-{:02d}".format(
-            date.year, 
-            date.month, 
-            date.day
-        )
-
-        url = '{}{}'.format(standings_base_url, date_string)
-
-        self.opts.setdefault("data", api.get(url))
-
-    # TODO - make more flexible with filtered options
-    def display(self):
-        """Show the ranked results on the console"""
-
-        """
-        [date]
-
-        [group-header]
-        [team-stat-header]
-        [ranked-team-stats]
-        """
-
-        # show the date
-        print(f'{"Date": <26}{self.opts["date"]}', end="\n\n")
-
-        for group, teams in self.opts["ranked"].items():
-            # group header
-            print(f"{group}")
-
-            # team stat header
-            print(f'{"Team": <26}{"GP": <4}{"W": <4}{"L": <4}{"OTL": <4}{"PTS": <4}')
-
-            # todo - filter header
-
-            # ranked team stats
-            for team in teams:
-                for key, value in team.items():
-                    if key == "teamName":
-                        print(f"{value['default']: <26}", end="")
-
-                    elif key == "gamesPlayed":
-                        print(f"{value: <4}", end="")
-
-                    elif key == "wins":
-                        print(f"{value: <4}", end="")
-
-                    elif key == "losses":
-                        print(f"{value: <4}", end="")
-
-                    elif key == "otLosses":
-                        print(f"{value: <4}", end="")
-
-                    elif key == "points":
-                        print(f"{value: <4}", end="")
-                    
-                    # todo - L10
-                    # todo - streak
-
-                print()
-
-            print()
 
     def overall(self, argv):
         if argv:
@@ -170,6 +112,16 @@ class Standings:
 
             self.opts.setdefault("selection", selection)
 
+    def get_data(self):
+        if not is_valid_query_date(self.opts["date"]):
+            argparse.ArgumentParser.error(
+                self=self.parser, 
+                message="invalid date format - use YYYY-MM-DD. see standings --help")
+
+        url = '{}{}'.format(standings_base_url, self.opts["date"])
+
+        self.opts.setdefault("data", api.get(url))
+
     def rank_results(self):
         if self.opts["ranking"] == "overall":
             self.opts.setdefault(
@@ -194,6 +146,58 @@ class Standings:
                 "ranked",
                 ranked_by_wild(self, 
                                self.opts["data"]["standings"]))
+
+    # TODO - make more flexible with filtered options
+    def display(self):
+        """Show the ranked results on the console"""
+
+        """
+        [date]
+
+        [group-header]
+        [team-stat-header]
+        [ranked-team-stats]
+        """
+
+        # show the date
+        print(f'{"Date": <26}{self.opts["date"]}', end="\n\n")
+
+        for group, teams in self.opts["ranked"].items():
+            # group header
+            print(f"{group}")
+
+            # team stat header
+            print(f'{"Team": <26}{"GP": <4}{"W": <4}{"L": <4}{"OTL": <4}{"PTS": <4}')
+
+            # todo - filter header
+
+            # ranked team stats
+            for team in teams:
+                for key, value in team.items():
+                    if key == "teamName":
+                        print(f"{value['default']: <26}", end="")
+
+                    elif key == "gamesPlayed":
+                        print(f"{value: <4}", end="")
+
+                    elif key == "wins":
+                        print(f"{value: <4}", end="")
+
+                    elif key == "losses":
+                        print(f"{value: <4}", end="")
+
+                    elif key == "otLosses":
+                        print(f"{value: <4}", end="")
+
+                    elif key == "points":
+                        print(f"{value: <4}", end="")
+                    
+                    # todo - L10
+                    # todo - streak
+
+                print()
+
+            print()
 
 def ranked_by_overall(self, teams: List) -> dict:
     result = dict()
@@ -245,16 +249,14 @@ def ranked_by_wild(self, teams: List) -> dict:
 
     return result
 
-def validate_query_date(text: str, parser: argparse.ArgumentParser) -> datetime:
-    for format in ("%Y-%m-%d", "%Y.%m.%d", "%Y/%m/%d", "%Y%m%d"):
-        try:
-            return datetime.strptime(text, format)
-        except ValueError:
-            pass
+def is_valid_query_date(text: str) -> bool:
+    try:
+        datetime.strptime(text, "%Y-%m-%d")
+        return True
+    except ValueError:
+        pass
         
-    argparse.ArgumentParser.error(
-        self=parser, 
-        message="invalid date format - use YYYY-MM-DD. see standings --help")
+    return False
 
 def filter_team_stats(self: Standings, team: dict) -> dict:
     """specify the team stats we want to show"""
