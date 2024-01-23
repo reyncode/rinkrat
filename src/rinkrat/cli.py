@@ -1,6 +1,6 @@
 import argparse
 import sys
-from typing import List
+from typing import List, Dict, Any
 
 from . import standings
 
@@ -18,25 +18,42 @@ class Cli:
         self.parser = argparse.ArgumentParser(prog="rinkrat", usage=usage_str)
         self.parser.add_argument("command")
 
-    def parse(self, argv: List[str]) -> None:
+    def parse(self, argv: List[str]) -> Dict[str, Any]:
+        """
+        package our args into a dict
+        """
+
         args = self.parser.parse_args(argv[:1])
 
-        try:
-            # invoke the relevant constructor
-            handler = getattr(self, args.command)()
-            # parse the users args
-            handler.parse(argv[1:])
-        except AttributeError:
+        if not hasattr(self, args.command):
             invalid = f"\"{args.command}\" is not a valid command, see --help"
 
             argparse.ArgumentParser.error(
                 self=self.parser,
                 message=invalid)
 
+        opts = vars(args)
+
+        opts["argv"] = argv
+        opts["constructor"] = getattr(self, args.command)
+
+        return opts
+
+def execute(opts: Dict[str, Any]):
+    """
+    execute the command that has been parsed with the collected args
+    """
+
+    obj = opts["constructor"]()
+    argv = opts["argv"]
+
+    obj.parse(argv[1:])
 
 def main(argv: List[str]):
     cli = Cli()
-    cli.parse(argv)
+    opts = cli.parse(argv)
+
+    execute(opts)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
