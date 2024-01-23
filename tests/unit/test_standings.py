@@ -30,17 +30,21 @@ def test_standings_ranking_exit_on_bad_args():
     to a ranking
     """
     args = {
-        "overall": ["overall", "additional"], # no additional args accepted
-        "conference": ["conference", "invalid"],
-        "division": ["division", "invalid"],
-        "wild": ["wild", "invalid"],
+        "overall": ["space"],
+        "conference": ["northern", "western"],
+        "division": ["atlantic", "mythic"],
+        "wild": ["scandinavia"],
     }
 
     obj = standings.Standings()
 
-    for value in args.values():
+    for k, v in args.items():
         with pytest.raises(SystemExit):
-            obj.parse(value)
+            argv = [k]
+            [argv.append(a) for a in v]
+
+            obj.parse(argv)
+            obj.execute()
 
 def test_standings_ranking_default_selection():
     """
@@ -58,6 +62,7 @@ def test_standings_ranking_default_selection():
 
     for ranking in defaults.keys():
         obj.parse([ranking])
+        obj.execute()
         assert defaults[ranking] == obj.opts["selection"]
 
 def test_standings_is_valid_query_date():
@@ -78,5 +83,6 @@ def test_standings_exit_on_bad_date():
 
     with pytest.raises(SystemExit):
         obj.parse(args)
+        obj.execute()
 
     

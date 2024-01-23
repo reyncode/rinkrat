@@ -40,24 +40,26 @@ class Standings:
             metavar="YYYY-MM-DD",
             help="query rankings for this date, YYYY-MM-DD")
 
-    def parse(self, argv: List[str]):
+    def parse(self, argv: List[str]) -> None:
         args = self.parser.parse_known_args(argv)
 
-        # create a dictionary of options that contain values
-        self.opts = {k: v for k, v in vars(args[0]).items() if v not in (None, "")}
-        
-        try:
-            getattr(self, args[0].ranking)(args[1])
-
-            self.get_data()
-            self.rank_results()
-            self.display()
-        except AttributeError:
+        if not hasattr(self, args[0].ranking):
             invalid = f"\"{args[0].ranking}\" is not a valid ranking, see --help"
 
             argparse.ArgumentParser.error(
                 self=self.parser,
                 message=invalid)
+
+        # create a dictionary of options that contain values
+        self.opts = {k: v for k, v in vars(args[0]).items() if v not in (None, "")}
+        self.opts.setdefault("args", args[1])
+
+    def execute(self) -> None:
+        getattr(self, self.opts["ranking"])(self.opts["args"])
+
+        self.get_data()
+        self.rank_results()
+        self.display()
 
     def overall(self, argv):
         if argv:

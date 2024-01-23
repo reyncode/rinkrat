@@ -48,6 +48,7 @@ def execute(opts: Dict[str, Any]):
     argv = opts["argv"]
 
     obj.parse(argv[1:])
+    obj.execute()
 
 def main(argv: List[str]):
     cli = Cli()
