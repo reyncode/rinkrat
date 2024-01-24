@@ -2,29 +2,29 @@ import pytest
 
 from rinkrat import standings
 
-def test_standings_has_ranking_attrs():
+@pytest.fixture
+def _standings() -> standings.Standings:
+    return standings.Standings()
+
+def test_standings_has_ranking_attrs(_standings):
     """
     does the object have callable attributes set for each ranking
     """
     attrs = ["overall", "conference", "division", "wild"]
 
-    obj = standings.Standings()
-
     for attr in attrs:
-        assert hasattr(obj, attr)
+        assert hasattr(_standings, attr)
 
-def test_standings_exit_on_bad_ranking():
+def test_standings_exit_on_bad_ranking(_standings):
     """
     does the program raise a SystemExit when a bad ranking is passed
     """
     args = ["invalid"]
 
-    obj = standings.Standings()
-
     with pytest.raises(SystemExit):
-        obj.parse(args)
+        _standings.parse(args)
 
-def test_standings_ranking_exit_on_bad_args():
+def test_standings_ranking_exit_on_bad_args(_standings):
     """
     does the program raise a SystemExit when an invalid argument is passed
     to a ranking
@@ -36,17 +36,15 @@ def test_standings_ranking_exit_on_bad_args():
         "wild": ["scandinavia"],
     }
 
-    obj = standings.Standings()
-
     for k, v in args.items():
         with pytest.raises(SystemExit):
             argv = [k]
             [argv.append(a) for a in v]
 
-            obj.parse(argv)
-            obj.execute()
+            _standings.parse(argv)
+            _standings.execute()
 
-def test_standings_ranking_default_selection():
+def test_standings_ranking_default_selection(_standings):
     """
     does the object contain the expected selections when defaults are used
     for the ranking
@@ -58,12 +56,10 @@ def test_standings_ranking_default_selection():
         "wild": ["eastern", "western"],
     }
 
-    obj = standings.Standings()
-
     for ranking in defaults.keys():
-        obj.parse([ranking])
-        obj.execute()
-        assert defaults[ranking] == obj.opts["selection"]
+        _standings.parse([ranking])
+        _standings.execute()
+        assert defaults[ranking] == _standings.opts["selection"]
 
 def test_standings_is_valid_query_date():
     """
