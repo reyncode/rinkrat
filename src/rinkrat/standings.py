@@ -128,28 +128,26 @@ class Standings:
         if self.opts["ranking"] == "overall":
             self.opts.setdefault(
                 "ranked",
-                ranked_by_overall(self, 
-                                  self.opts["data"]["standings"]))
+                ranked_overall(self.opts["data"]["standings"]))
 
         if self.opts["ranking"] == "conference":
             self.opts.setdefault(
                 "ranked",
-                ranked_by_conference(self, 
-                                     self.opts["data"]["standings"]))
+                ranked_conference(self.opts["selection"], 
+                                  self.opts["data"]["standings"]))
 
         if self.opts["ranking"] == "division":
             self.opts.setdefault(
                 "ranked",
-                ranked_by_division(self, 
-                                   self.opts["data"]["standings"]))
+                ranked_division(self.opts["selection"],
+                                self.opts["data"]["standings"]))
 
         if self.opts["ranking"] == "wild":
             self.opts.setdefault(
                 "ranked",
-                ranked_by_wild(self, 
-                               self.opts["data"]["standings"]))
+                ranked_wild(self.opts["selection"],
+                            self.opts["data"]["standings"]))
 
-    # TODO - make more flexible with filtered options
     def display(self):
         """Show the ranked results on the console"""
 
@@ -201,53 +199,52 @@ class Standings:
 
             print()
 
-def ranked_by_overall(self, teams: List) -> dict:
+def ranked_overall(teams: List[dict]) -> dict:
     result = dict()
-    name = str()
 
-    for x in self.opts["selection"]:
-        name = x.capitalize()
-        result.setdefault(name, [])
+    name = "Overall"
+
+    result.setdefault(name, [])
 
     for team in teams:
-        result[name].append(filter_team_stats(self, team))
+        result[name].append(filter_team_stats(team))
 
     return result
 
-def ranked_by_conference(self, teams: List) -> dict:
+def ranked_conference(conferences: List[str], teams: List[dict]) -> dict:
     result = dict()
 
-    for x in self.opts["selection"]:
-        result.setdefault(x.capitalize(), [])
+    for conf in conferences:
+        result.setdefault(conf.capitalize(), [])
 
     for team in teams:
         if team["conferenceName"] in result:
-            result[team["conferenceName"]].append(filter_team_stats(self, team))
+            result[team["conferenceName"]].append(filter_team_stats(team))
 
     return result
 
-def ranked_by_division(self, teams: List) -> dict:
+def ranked_division(divisions: List[str], teams: List[dict]) -> dict:
     result = dict()
 
-    for x in self.opts["selection"]:
-        result.setdefault(x.capitalize(), [])
+    for div in divisions:
+        result.setdefault(div.capitalize(), [])
 
     for team in teams:
         if team["divisionName"] in result:
-            result[team["divisionName"]].append(filter_team_stats(self, team))
+            result[team["divisionName"]].append(filter_team_stats(team))
 
     return result
 
-def ranked_by_wild(self, teams: List) -> dict:
+def ranked_wild(conferences: List[str], teams: List[dict]) -> dict:
     result = dict()
 
-    for x in self.opts["selection"]:
-        result.setdefault(x.capitalize(), [])
+    for conf in conferences:
+        result.setdefault(conf.capitalize(), [])
 
     for team in teams:
         if team["conferenceName"] in result:
             if team["wildcardSequence"] > 0:
-                result[team["conferenceName"]].append(filter_team_stats(self, team))
+                result[team["conferenceName"]].append(filter_team_stats(team))
 
     return result
 
@@ -260,7 +257,7 @@ def is_valid_query_date(text: str) -> bool:
         
     return False
 
-def filter_team_stats(self: Standings, team: dict) -> dict:
+def filter_team_stats(team: dict) -> dict:
     """specify the team stats we want to show"""
 
     filtered = dict()
