@@ -20,9 +20,9 @@ class Cli:
 
     def parse(self, argv: List[str]) -> Dict[str, Any]:
         """
-        package our args into a dict
+        Parses the passed argument vector and stores the results
+        inside of a dict that can be passed to execute().
         """
-
         args = self.parser.parse_args(argv[:1])
 
         if not hasattr(self, args.command):
@@ -34,28 +34,18 @@ class Cli:
 
         opts = vars(args)
 
+        # TODO - make this a field of cli
         opts["argv"] = argv
         opts["constructor"] = getattr(self, args.command)
 
         return opts
 
-def execute(opts: Dict[str, Any]):
-    """
-    execute the command that has been parsed with the collected args
-    """
+    def execute(self, opts: Dict[str, Any]):
+        """
+        Perform the actions associated with the stored argument.
+        """
+        obj = opts["constructor"]()
+        argv = opts["argv"]
 
-    obj = opts["constructor"]()
-    argv = opts["argv"]
-
-    obj.parse(argv[1:])
-    obj.execute()
-
-def main(argv: List[str]):
-    cli = Cli()
-    opts = cli.parse(argv)
-
-    execute(opts)
-
-if __name__ == "__main__":
-    main(sys.argv[1:])
-    # ^ don't include the name of the program
+        obj.parse(argv[1:])
+        obj.execute()
