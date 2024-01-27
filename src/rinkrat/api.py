@@ -3,8 +3,9 @@ import requests_cache
 from datetime import timedelta
 
 requests_cache.install_cache(
-    'data/rinkrat_cache',
+    'rinkrat_cache',
     'sqlite',
+    use_cache_dir=True,
     expire_after = timedelta(0, 0, 0, 0, 5.0, 0, 0)
 )
 
