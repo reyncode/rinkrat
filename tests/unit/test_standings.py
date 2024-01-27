@@ -67,8 +67,8 @@ def test_standings_is_valid_query_date():
     does the function return true for the accepted format and false
     otherwise
     """
-    assert standings.is_valid_query_date("2010-12-31") == True
-    assert standings.is_valid_query_date("12.345/6789") == False
+    assert standings._is_valid_query_date("2010-12-31") == True
+    assert standings._is_valid_query_date("12.345/6789") == False
 
 def test_standings_exit_on_bad_date(_standings):
     """
@@ -81,55 +81,59 @@ def test_standings_exit_on_bad_date(_standings):
         _standings.execute()
 
 def test_standings_ranking_overall():
-    result = standings.ranked_overall(data.teams_2023_12_31)
+    result = standings._ranked_overall(data.teams_2023_12_31)
 
     for i, team in enumerate(result["Overall"]):
         assert data.overall_2023_12_31[i] == team.get('teamName').get('default')
         
 def test_standings_ranking_eastern_conference():
-    result = standings.ranked_conference(["eastern"], data.teams_2023_12_31)
+    result = standings._ranked_conference(["eastern"], data.teams_2023_12_31)
 
     for i, team in enumerate(result["Eastern"]):
         assert data.eastern_conference_2023_12_31[i] == team.get('teamName').get('default')
 
 def test_standings_ranking_western_conference():
-    result = standings.ranked_conference(["western"], data.teams_2023_12_31)
+    result = standings._ranked_conference(["western"], data.teams_2023_12_31)
 
     for i, team in enumerate(result["Western"]):
         assert data.western_conference_2023_12_31[i] == team.get('teamName').get('default')
 
 def test_standings_ranking_atlantic_division():
-    result = standings.ranked_division(["atlantic"], data.teams_2023_12_31)
+    result = standings._ranked_division(["atlantic"], data.teams_2023_12_31)
 
     for i, team in enumerate(result["Atlantic"]):
         assert data.atlantic_division_2023_12_31[i] == team.get('teamName').get('default')
     
 def test_standings_ranking_metropolitan_division():
-    result = standings.ranked_division(["metropolitan"], data.teams_2023_12_31)
+    result = standings._ranked_division(["metropolitan"], data.teams_2023_12_31)
 
     for i, team in enumerate(result["Metropolitan"]):
         assert data.metropolitan_division_2023_12_31[i] == team.get('teamName').get('default')
 
 def test_standings_ranking_central_division():
-    result = standings.ranked_division(["central"], data.teams_2023_12_31)
+    result = standings._ranked_division(["central"], data.teams_2023_12_31)
 
     for i, team in enumerate(result["Central"]):
         assert data.central_division_2023_12_31[i] == team.get('teamName').get('default')
 
 def test_standings_ranking_pacific_division():
-    result = standings.ranked_division(["pacific"], data.teams_2023_12_31)
+    result = standings._ranked_division(["pacific"], data.teams_2023_12_31)
 
     for i, team in enumerate(result["Pacific"]):
         assert data.pacific_division_2023_12_31[i] == team.get('teamName').get('default')
 
 def test_standings_ranking_eastern_wildcard():
-    result = standings.ranked_wild(["eastern"], data.teams_2023_12_31)
+    result = standings._ranked_wild(["eastern"], data.teams_2023_12_31)
 
     for i, team in enumerate(result["Eastern"]):
         assert data.eastern_wildcard_2023_12_31[i] == team.get('teamName').get('default')
 
 def test_standings_ranking_western_wildcard():
-    result = standings.ranked_wild(["western"], data.teams_2023_12_31)
+    result = standings._ranked_wild(["western"], data.teams_2023_12_31)
 
     for i, team in enumerate(result["Western"]):
         assert data.western_wildcard_2023_12_31[i] == team.get('teamName').get('default')
+
+def test_standings_call_execute_without_parsing(_standings):
+    with pytest.raises(SystemExit):
+        _standings.execute()

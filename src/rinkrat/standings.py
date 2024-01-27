@@ -1,5 +1,6 @@
 import argparse
 from datetime import datetime
+import sys as _sys
 from typing import List
 
 from . import api
@@ -18,10 +19,10 @@ rankings:
 class Standings:
     def __init__(self) -> None:
         # being verbose on set ranking attrs
-        setattr(self, "overall", self.overall)
-        setattr(self, "conference", self.conference)
-        setattr(self, "division", self.division)
-        setattr(self, "wild", self.wild)
+        setattr(self, "overall", self._overall)
+        setattr(self, "conference", self._conference)
+        setattr(self, "division", self._division)
+        setattr(self, "wild", self._wild)
 
         # use today's date as the default
         today = datetime.now()
@@ -41,6 +42,11 @@ class Standings:
             help="query rankings for this date, YYYY-MM-DD")
 
     def parse(self, argv: List[str]) -> None:
+        """
+        Takes a list of arguments and passes them to argparse for parsing.
+
+        The results are stored internally for later processing.
+        """
         args = self.parser.parse_known_args(argv)
 
         if not hasattr(self, args[0].ranking):
@@ -55,13 +61,21 @@ class Standings:
         self.opts.setdefault("args", args[1])
 
     def execute(self) -> None:
-        getattr(self, self.opts["ranking"])(self.opts["args"])
+        """
+        Perform the action associated with the stored argument.
+        """
+        try:
+            getattr(self, self.opts["ranking"])(self.opts["args"])
+        except AttributeError:
+            invalid = f"{self.parser.prog}: error: execute cannot be called without first calling parse\n"
+            _sys.stderr.write(invalid)
+            _sys.exit(2)
 
-        self.get_data()
-        self.rank_results()
-        self.display()
+        self._get_data()
+        self._rank_results()
+        self._display()
 
-    def overall(self, argv):
+    def _overall(self, argv):
         if argv:
             argparse.ArgumentParser.error(
                 self=self.parser,
@@ -69,7 +83,7 @@ class Standings:
         else:
             self.opts.setdefault("selection", ["overall"])
         
-    def conference(self, argv: List[str]):
+    def _conference(self, argv: List[str]):
         conferences = ["eastern", "western"]
         if any(i not in conferences for i in argv):
             argparse.ArgumentParser.error(
@@ -84,7 +98,7 @@ class Standings:
 
             self.opts.setdefault("selection", selection)
         
-    def division(self, argv):
+    def _division(self, argv):
         divisions = ["atlantic", "metropolitan", "central", "pacific"]
         if any(i not in divisions for i in argv):
             argparse.ArgumentParser.error(
@@ -99,7 +113,7 @@ class Standings:
 
             self.opts.setdefault("selection", selection)
         
-    def wild(self, argv):
+    def _wild(self, argv):
         conferences = ["eastern", "western"]
         if any(i not in conferences for i in argv):
             argparse.ArgumentParser.error(
@@ -114,8 +128,8 @@ class Standings:
 
             self.opts.setdefault("selection", selection)
 
-    def get_data(self):
-        if not is_valid_query_date(self.opts["date"]):
+    def _get_data(self):
+        if not _is_valid_query_date(self.opts["date"]):
             argparse.ArgumentParser.error(
                 self=self.parser, 
                 message="invalid date format - use YYYY-MM-DD. see standings --help")
@@ -124,31 +138,31 @@ class Standings:
 
         self.opts.setdefault("data", api.get(url))
 
-    def rank_results(self):
+    def _rank_results(self):
         if self.opts["ranking"] == "overall":
             self.opts.setdefault(
                 "ranked",
-                ranked_overall(self.opts["data"]["standings"]))
+                _ranked_overall(self.opts["data"]["standings"]))
 
         if self.opts["ranking"] == "conference":
             self.opts.setdefault(
                 "ranked",
-                ranked_conference(self.opts["selection"], 
+                _ranked_conference(self.opts["selection"], 
                                   self.opts["data"]["standings"]))
 
         if self.opts["ranking"] == "division":
             self.opts.setdefault(
                 "ranked",
-                ranked_division(self.opts["selection"],
+                _ranked_division(self.opts["selection"],
                                 self.opts["data"]["standings"]))
 
         if self.opts["ranking"] == "wild":
             self.opts.setdefault(
                 "ranked",
-                ranked_wild(self.opts["selection"],
+                _ranked_wild(self.opts["selection"],
                             self.opts["data"]["standings"]))
 
-    def display(self):
+    def _display(self):
         """Show the ranked results on the console"""
 
         """
@@ -199,7 +213,7 @@ class Standings:
 
             print()
 
-def ranked_overall(teams: List[dict]) -> dict:
+def _ranked_overall(teams: List[dict]) -> dict:
     result = dict()
 
     name = "Overall"
@@ -211,7 +225,7 @@ def ranked_overall(teams: List[dict]) -> dict:
 
     return result
 
-def ranked_conference(conferences: List[str], teams: List[dict]) -> dict:
+def _ranked_conference(conferences: List[str], teams: List[dict]) -> dict:
     result = dict()
 
     for conf in conferences:
@@ -223,7 +237,7 @@ def ranked_conference(conferences: List[str], teams: List[dict]) -> dict:
 
     return result
 
-def ranked_division(divisions: List[str], teams: List[dict]) -> dict:
+def _ranked_division(divisions: List[str], teams: List[dict]) -> dict:
     result = dict()
 
     for div in divisions:
@@ -235,7 +249,7 @@ def ranked_division(divisions: List[str], teams: List[dict]) -> dict:
 
     return result
 
-def ranked_wild(conferences: List[str], teams: List[dict]) -> dict:
+def _ranked_wild(conferences: List[str], teams: List[dict]) -> dict:
     result = dict()
 
     for conf in conferences:
@@ -248,7 +262,7 @@ def ranked_wild(conferences: List[str], teams: List[dict]) -> dict:
 
     return result
 
-def is_valid_query_date(text: str) -> bool:
+def _is_valid_query_date(text: str) -> bool:
     try:
         datetime.strptime(text, "%Y-%m-%d")
         return True
