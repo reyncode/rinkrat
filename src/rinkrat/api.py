@@ -2,6 +2,8 @@ import requests
 import requests_cache
 from datetime import timedelta
 
+import sys as _sys
+
 requests_cache.install_cache(
     'rinkrat_cache',
     'sqlite',
@@ -10,6 +12,10 @@ requests_cache.install_cache(
 )
 
 def get(url: str, params=None, **kwargs) -> dict:
+    """
+    Make a GET request to the provided url and return the results
+    as a json encoded object.
+    """
     try:
         response = requests.get(url, params=params, **kwargs)
         response.raise_for_status()
@@ -18,7 +24,9 @@ def get(url: str, params=None, **kwargs) -> dict:
             result = response.json()
             return result
         except requests.exceptions.JSONDecodeError as e:
-            raise SystemExit(e)
+            _sys.stderr.write(f"{__name__}: {e}\n")
+            raise SystemExit()
 
     except requests.exceptions.RequestException as e:
-        raise SystemExit(e)
+        _sys.stderr.write(f"{__name__}: {e}\n")
+        raise SystemExit()
