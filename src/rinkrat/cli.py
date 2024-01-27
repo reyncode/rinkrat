@@ -1,5 +1,5 @@
 import argparse
-import sys
+import sys as _sys
 from typing import List, Dict, Any
 
 from . import standings
@@ -18,10 +18,11 @@ class Cli:
         self.parser = argparse.ArgumentParser(prog="rinkrat", usage=usage_str)
         self.parser.add_argument("command")
 
-    def parse(self, argv: List[str]) -> Dict[str, Any]:
+    def parse(self, argv: List[str]) -> None:
         """
-        Parses the passed argument vector and stores the results
-        inside of a dict that can be passed to execute().
+        Parses the argument vector looking for a command name that matches
+        a registered attr. The results are stored internally for further
+        processing.
         """
         args = self.parser.parse_args(argv[:1])
 
@@ -32,20 +33,19 @@ class Cli:
                 self=self.parser,
                 message=invalid)
 
-        opts = vars(args)
+        self.opts = {k: v for k, v in vars(args).items() if v not in (None, "")}
+        self.opts.setdefault("args", argv[1:])
+        # ^ forward the remaining args for parsing by the assigned class
 
-        # TODO - make this a field of cli
-        opts["argv"] = argv
-        opts["constructor"] = getattr(self, args.command)
-
-        return opts
-
-    def execute(self, opts: Dict[str, Any]):
+    def execute(self):
         """
-        Perform the actions associated with the stored argument.
+        Perform the actions associated with the stored command.
         """
-        obj = opts["constructor"]()
-        argv = opts["argv"]
-
-        obj.parse(argv[1:])
-        obj.execute()
+        try:
+            obj = getattr(self, self.opts["command"])()
+            obj.parse(self.opts["args"])
+            obj.execute()
+        except AttributeError:
+            invalid = f"{self.parser.prog}: error: calling execute without a stored attribute\n"
+            _sys.stderr.write(invalid)
+            _sys.exit(2)

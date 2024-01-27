@@ -6,8 +6,8 @@ from . import cli
 def main(argv: List[str]) -> None:
     interface = cli.Cli()
 
-    opts = interface.parse(argv)
-    interface.execute(opts)
+    interface.parse(argv)
+    interface.execute()
 
 if __name__ == "__main__":
     main(_sys.argv[1:])
