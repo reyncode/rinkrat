@@ -1,7 +1,7 @@
 import pytest
 
 from rinkrat import standings
-from data import data
+from .data import data
 
 @pytest.fixture
 def _standings() -> standings.Standings:
