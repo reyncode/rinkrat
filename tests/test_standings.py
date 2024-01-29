@@ -31,28 +31,18 @@ def expected_json(request):
             return data
 
 def test_standings_has_ranking_attrs(standings_object):
-    """
-    does the object have callable attributes set for each ranking
-    """
     attrs = ["overall", "conference", "division", "wild"]
 
     for attr in attrs:
         assert hasattr(standings_object, attr)
 
 def test_standings_exit_on_bad_ranking(standings_object):
-    """
-    does the program raise a SystemExit when a bad ranking is passed
-    """
     args = ["invalid"]
 
     with pytest.raises(SystemExit):
         standings_object.parse(args)
 
 def test_standings_ranking_exit_on_bad_args(standings_object):
-    """
-    does the program raise a SystemExit when an invalid argument is passed
-    to a ranking
-    """
     args = {
         "overall": ["space"],
         "conference": ["northern", "western"],
@@ -70,8 +60,7 @@ def test_standings_ranking_exit_on_bad_args(standings_object):
 
 def test_standings_ranking_default_selection(standings_object):
     """
-    does the object contain the expected selections when defaults are used
-    for the ranking
+    Does opts contain the expected selections when defaults are used.
     """
     defaults = {
         "overall": ["overall"],
@@ -86,10 +75,6 @@ def test_standings_ranking_default_selection(standings_object):
         assert defaults[ranking] == standings_object.opts["selection"]
 
 def test_standings_is_valid_query_date():
-    """
-    does the function return true for the accepted format and false
-    otherwise
-    """
     assert standings._is_valid_query_date("2010-12-31") == True
     assert standings._is_valid_query_date("12.345/6789") == False
 

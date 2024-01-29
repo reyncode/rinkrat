@@ -7,9 +7,6 @@ def _cli() -> cli.Cli:
     return cli.Cli()
 
 def test_cli_has_command_attrs(_cli):
-    """
-    ensure the cli has assigned the command name as an attribute.
-    """
     attrs = ["standings"]
 
     for attr in attrs:
@@ -23,8 +20,8 @@ def test_cli_exit_on_bad_command(_cli):
 
 def test_cli_calling_execute_before_parse(_cli):
     """
-    the application should throw a system exit if the programmer tries
-    to call the execute method before calling parse
+    The application should raise a SystemExit exception if the programmer tries
+    to call execute() before calling parse()
     """
     with pytest.raises(SystemExit):
         _cli.execute()
