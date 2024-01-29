@@ -28,3 +28,6 @@ Issues = "https://github.com/reyncode/rinkrat/issues"
 pythonpath = [
   "src"
 ]
+markers = [
+  "expected_data: determines which nested dict is returned"
+]
