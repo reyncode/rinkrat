@@ -3,9 +3,8 @@ from datetime import datetime
 import sys as _sys
 from typing import List
 
-from . import api
-
-standings_base_url = 'https://api-web.nhle.com/v1/standings/'
+from rinkrat import api
+from rinkrat import STANDINGS_BASE_URL
 
 usage_str = """standings <ranking> [<args>]
 
@@ -134,7 +133,7 @@ class Standings:
                 self=self.parser, 
                 message="invalid date format - use YYYY-MM-DD. see standings --help")
 
-        url = '{}{}'.format(standings_base_url, self.opts["date"])
+        url = '{}{}'.format(STANDINGS_BASE_URL, self.opts["date"])
 
         self.opts.setdefault("data", api.get(url))
 
