@@ -2,7 +2,7 @@ import argparse
 import sys as _sys
 from typing import List, Dict, Any
 
-from . import standings
+from rinkrat import standings
 
 usage_str = """rinkrat <command> [<args>]
 

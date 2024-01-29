@@ -1,7 +1,7 @@
 import sys as _sys
 from typing import List
 
-from . import cli
+from rinkrat import cli
 
 def main(argv: List[str]) -> None:
     interface = cli.Cli()
