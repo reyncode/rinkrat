@@ -29,6 +29,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pip-tools", "pytest"]
 
+[project.scripts]
+rinkrat = "rinkrat.__main__:run"
+
 [project.urls]
 Homepage = "https://github.com/reyncode/rinkrat.git"
 Issues = "https://github.com/reyncode/rinkrat/issues"
