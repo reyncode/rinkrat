@@ -15,4 +15,4 @@ It is supported by python 3.8 and above.
 Rinkrat uses the command line interface to get statistics from the public NHL api. With the current version you can access team standings data and rank it based on several criteria:
 
 ### Commands
-Commands give you access to different data. Sub-commands determine how that data is organized and presented. For command snippits and descriptions, please see the [commands](docs/commands/README.md) directory.
+Commands give you access to different data. Sub-commands determine how that data is organized and presented. For command snippits and descriptions, please see the [commands](docs/commands) directory.
