@@ -172,21 +172,19 @@ class Standings:
         [ranked-team-stats]
         """
 
-        # show the date
-        print(f'{"Date": <26}{self.opts["date"]}', end="\n\n")
-
         for group, teams in self.opts["ranked"].items():
             # group header
             print(f"{group}")
 
             # team stat header
-            print(f'{"Team": <26}{"GP": <4}{"W": <4}{"L": <4}{"OTL": <4}{"PTS": <4}')
-
-            # todo - filter header
+            print(f'{"": <3}{"": <26}{"GP": <4}{"W": <4}{"L": <4}{"OTL": <4}{"PTS": <4}')
 
             # ranked team stats
-            for team in teams:
+            for i, team in enumerate(teams):
+                print(f"{i+1: <3}", end="")
+
                 for key, value in team.items():
+
                     if key == "teamName":
                         print(f"{value['default']: <26}", end="")
 
@@ -204,13 +202,13 @@ class Standings:
 
                     elif key == "points":
                         print(f"{value: <4}", end="")
-                    
-                    # todo - L10
-                    # todo - streak
 
                 print()
 
             print()
+
+        # show the date
+        print(f'As of {self.opts["date"]}')
 
 def _ranked_overall(teams: List[dict]) -> dict:
     result = dict()
