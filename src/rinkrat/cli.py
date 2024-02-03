@@ -2,7 +2,7 @@ import argparse
 import sys as _sys
 from typing import List, Dict, Any
 
-from rinkrat import standings
+from rinkrat import standings, __version__
 
 usage_str = """rinkrat <command> [<args>]
 
@@ -21,7 +21,7 @@ class Cli:
             "-v",
             "--version",
             action="version",
-            version="%(prog)s 0.1.0")
+            version=f"%(prog)s {__version__}")
 
     def parse(self, argv: List[str]) -> None:
         """

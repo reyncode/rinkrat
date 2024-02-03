@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pip-tools", "pytest"]
+dev = ["pip-tools", "pytest", "bumpver"]
 
 [project.scripts]
 rinkrat = "rinkrat.__main__:run"
@@ -42,4 +42,21 @@ pythonpath = [
 ]
 markers = [
   "expected_data: determines which nested dict is returned"
+]
+
+[bumpver]
+current_version = "0.1.0"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message  = "bump version {old_version} -> {new_version}"
+commit          = true
+tag             = true
+push            = false
+
+[bumpver.file_patterns]
+"pyproject.toml" = [
+  '^version = "{version}"',
+  '^current_version = "{version}"',
+]
+"src/rinkrat/__init__.py" = [
+    '__version__ = "{version}"',
 ]
