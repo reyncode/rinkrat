@@ -17,6 +17,11 @@ class Cli:
 
         self.parser = argparse.ArgumentParser(prog="rinkrat", usage=usage_str)
         self.parser.add_argument("command")
+        self.parser.add_argument(
+            "-v",
+            "--version",
+            action="version",
+            version="%(prog)s 0.1.0")
 
     def parse(self, argv: List[str]) -> None:
         """
